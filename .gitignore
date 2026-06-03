@@ -7,3 +7,7 @@ build/
 .env.local
 .vercel/
 .DS_Store
+
+.config/
+.local/
+uploads/
