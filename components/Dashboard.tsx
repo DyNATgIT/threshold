@@ -13,6 +13,8 @@ import { useBlackboard } from '@/lib/useBlackboard';
 
 export function Dashboard() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const cursorLabelRef = useRef<HTMLSpanElement>(null);
   const {
     snapshot,
     modeLabel,
@@ -62,7 +64,50 @@ export function Dashboard() {
 
   useEffect(() => {
     if (!rootRef.current) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const root = rootRef.current;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const cleanupCallbacks: Array<() => void> = [];
+
+    if (hasFinePointer && cursorRef.current && cursorLabelRef.current) {
+      const cursor = cursorRef.current;
+      const cursorLabel = cursorLabelRef.current;
+      const xTo = gsap.quickTo(cursor, 'x', { duration: 0.16, ease: 'power3.out' });
+      const yTo = gsap.quickTo(cursor, 'y', { duration: 0.16, ease: 'power3.out' });
+
+      const moveCursor = (event: PointerEvent) => {
+        xTo(event.clientX);
+        yTo(event.clientY);
+        cursor.classList.add('is-visible');
+      };
+
+      const cursorEnter = (event: PointerEvent) => {
+        const target = (event.target as HTMLElement).closest<HTMLElement>('[data-cursor-label]');
+        if (!target || !root.contains(target)) return;
+        cursorLabel.textContent = target.dataset.cursorLabel || 'VIEW';
+        cursor.classList.add('is-expanded');
+      };
+
+      const cursorLeave = (event: PointerEvent) => {
+        const target = (event.target as HTMLElement).closest<HTMLElement>('[data-cursor-label]');
+        if (!target || !root.contains(target)) return;
+        cursor.classList.remove('is-expanded');
+      };
+
+      window.addEventListener('pointermove', moveCursor, { passive: true });
+      root.addEventListener('pointerover', cursorEnter);
+      root.addEventListener('pointerout', cursorLeave);
+      cleanupCallbacks.push(() => {
+        window.removeEventListener('pointermove', moveCursor);
+        root.removeEventListener('pointerover', cursorEnter);
+        root.removeEventListener('pointerout', cursorLeave);
+      });
+    }
+
+    if (prefersReducedMotion) {
+      return () => cleanupCallbacks.forEach((callback) => callback());
+    }
 
     gsap.registerPlugin(ScrollTrigger);
 
@@ -71,6 +116,8 @@ export function Dashboard() {
 
       intro
         .from('.motion-topbar', { y: -18, opacity: 0 })
+        .from('.motion-cinema-copy > *', { y: 24, opacity: 0, stagger: 0.08 }, '-=0.35')
+        .from('.motion-orbit', { scale: 0.88, opacity: 0, duration: 0.95 }, '-=0.55')
         .from('.motion-command-chip', { y: 20, opacity: 0, stagger: 0.05 }, '-=0.45')
         .from('.motion-hero-word', { yPercent: 105, opacity: 0, stagger: 0.08, duration: 0.95 }, '-=0.3')
         .from('.motion-hero-copy', { y: 18, opacity: 0 }, '-=0.5')
@@ -99,12 +146,19 @@ export function Dashboard() {
       });
     }, rootRef);
 
-    return () => ctx.revert();
+    return () => {
+      cleanupCallbacks.forEach((callback) => callback());
+      ctx.revert();
+    };
   }, []);
 
   return (
     <div className="dashboard-shell" ref={rootRef}>
-      <header className="topbar motion-topbar">
+      <div className="cursor-shell" ref={cursorRef} aria-hidden="true">
+        <span className="cursor-label" ref={cursorLabelRef}>SCAN</span>
+      </div>
+
+      <header className="topbar motion-topbar" data-cursor-label="COMMAND">
         <div className="brand-lockup">
           <span className="micro-label accent-label">Autonomous Crisis System</span>
           <h1>THRESHOLD</h1>
@@ -131,6 +185,28 @@ export function Dashboard() {
         </div>
       </header>
 
+      <section className="cinema-band motion-reveal" data-cursor-label="FORESIGHT">
+        <div className="cinema-copy motion-cinema-copy">
+          <span className="micro-label accent-label">Prediction theater // live operational model</span>
+          <h2>The machine saw it first.</h2>
+          <p>
+            THRESHOLD turns the command center into a living interface: signals become arguments,
+            arguments become branches, and branches collapse into action.
+          </p>
+        </div>
+        <div className="foresight-orb motion-orbit" aria-hidden="true">
+          <span className="orb-ring orb-ring-one" />
+          <span className="orb-ring orb-ring-two" />
+          <span className="orb-ring orb-ring-three" />
+          <span className="orb-core">{snapshot.threatIndex.toFixed(1)}</span>
+        </div>
+        <div className="cinema-readout">
+          <span className="micro-label">Forecast lock</span>
+          <strong>{snapshot.forecastWindowMin}m</strong>
+          <small>{snapshot.triggerState} // {snapshot.consensus}% consensus</small>
+        </div>
+      </section>
+
       <section className="command-strip motion-reveal">
         <div className="command-chip motion-command-chip">
           <span className="micro-label">Hotkeys</span>
@@ -151,6 +227,13 @@ export function Dashboard() {
           <span className="micro-label">Reset</span>
           <strong>0</strong>
           <small>Return to baseline.</small>
+        </div>
+      </section>
+
+      <section className="marquee-strip motion-reveal" aria-hidden="true">
+        <div className="marquee-track">
+          <span>THRESHOLD • LIVE BLACKBOARD • AGENT STREAM • SIMULACRA FUTURES • COUNCIL DEBATE • DEPLOYMENT LOGIC • </span>
+          <span>THRESHOLD • LIVE BLACKBOARD • AGENT STREAM • SIMULACRA FUTURES • COUNCIL DEBATE • DEPLOYMENT LOGIC • </span>
         </div>
       </section>
 

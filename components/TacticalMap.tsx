@@ -45,7 +45,7 @@ export function TacticalMap({
   const actionPath = pathForMutation(snapshot.activeMutation);
 
   return (
-    <section className="panel map-panel motion-panel-center motion-reveal">
+    <section className="panel map-panel motion-panel-center motion-reveal" data-cursor-label="MAP">
       <div className="map-ambient map-ambient-cyan" />
       <div className="map-ambient map-ambient-red" />
 

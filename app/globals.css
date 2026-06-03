@@ -1381,3 +1381,287 @@ a {
     min-height: 26rem;
   }
 }
+
+/* --- Award-site wow layer: lightweight cursor, cinematic intro, marquee --- */
+.cursor-shell {
+  transform: translate3d(-120px, -120px, 0) translate(-50%, -50%);
+  transition:
+    width 180ms ease,
+    height 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    opacity 180ms ease;
+}
+
+.cursor-shell.is-visible {
+  opacity: 1;
+}
+
+.cursor-shell.is-expanded {
+  width: 108px;
+  height: 108px;
+  border-color: rgba(247, 195, 106, 0.58);
+  background: rgba(247, 195, 106, 0.055);
+  box-shadow: 0 0 46px rgba(247, 195, 106, 0.12), 0 0 82px rgba(114, 232, 255, 0.08);
+}
+
+.cursor-shell.is-expanded::before {
+  opacity: 0.35;
+}
+
+.cursor-shell.is-expanded .cursor-label {
+  opacity: 1;
+}
+
+.cinema-band {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(24rem, 42vw, 43rem);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 520px) minmax(220px, 320px);
+  align-items: center;
+  gap: clamp(1rem, 3vw, 3rem);
+  padding: clamp(1.5rem, 4vw, 4rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(circle at 58% 45%, rgba(255, 100, 100, 0.15), transparent 0 22%),
+    radial-gradient(circle at 22% 20%, rgba(114, 232, 255, 0.16), transparent 0 26%),
+    linear-gradient(135deg, rgba(12, 18, 28, 0.84), rgba(3, 6, 12, 0.94));
+  box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  isolation: isolate;
+}
+
+.cinema-band::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 76px 76px;
+  mask-image: radial-gradient(circle at 52% 45%, black, transparent 75%);
+  opacity: 0.55;
+  z-index: -2;
+}
+
+.cinema-band::after {
+  content: 'THRESHOLD';
+  position: absolute;
+  left: -0.05em;
+  bottom: -0.26em;
+  font-size: clamp(6rem, 18vw, 21rem);
+  font-weight: 950;
+  letter-spacing: -0.09em;
+  line-height: 0.8;
+  color: rgba(255, 255, 255, 0.035);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.cinema-copy {
+  max-width: 780px;
+}
+
+.cinema-copy h2 {
+  margin: 0.85rem 0 1.1rem;
+  max-width: 9.5ch;
+  font-size: clamp(4.4rem, 10vw, 11.5rem);
+  line-height: 0.78;
+  letter-spacing: -0.085em;
+  text-transform: uppercase;
+}
+
+.cinema-copy p {
+  max-width: 44rem;
+  margin: 0;
+  color: rgba(233, 244, 251, 0.73);
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  line-height: 1.65;
+}
+
+.foresight-orb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(42vw, 480px);
+  aspect-ratio: 1;
+  justify-self: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255, 100, 100, 0.22), transparent 0 18%),
+    radial-gradient(circle, rgba(114, 232, 255, 0.12), transparent 0 44%);
+  filter: drop-shadow(0 0 70px rgba(114, 232, 255, 0.13));
+}
+
+.orb-ring {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transform: rotateX(64deg) rotateZ(0deg);
+  animation: orbitSpin 16s linear infinite;
+}
+
+.orb-ring::after {
+  content: '';
+  position: absolute;
+  top: 17%;
+  left: 20%;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--cyan);
+  box-shadow: 0 0 18px rgba(114, 232, 255, 0.92);
+}
+
+.orb-ring-two {
+  inset: 20%;
+  animation-duration: 11s;
+  animation-direction: reverse;
+  border-color: rgba(247, 195, 106, 0.2);
+}
+
+.orb-ring-three {
+  inset: 33%;
+  animation-duration: 8s;
+  border-color: rgba(255, 100, 100, 0.22);
+}
+
+.orb-core {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 128px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  color: var(--amber);
+  font-size: 2.3rem;
+  font-weight: 900;
+  background:
+    radial-gradient(circle, rgba(247, 195, 106, 0.17), transparent 58%),
+    rgba(255, 100, 100, 0.1);
+  border: 1px solid rgba(247, 195, 106, 0.25);
+  box-shadow: 0 0 90px rgba(255, 100, 100, 0.2);
+  animation: coreBreathe 2.8s ease-in-out infinite;
+}
+
+.cinema-readout {
+  justify-self: end;
+  display: grid;
+  gap: 0.5rem;
+  width: min(100%, 290px);
+  padding: 1.15rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(14px);
+}
+
+.cinema-readout strong {
+  font-size: clamp(3rem, 5vw, 5rem);
+  line-height: 0.9;
+  letter-spacing: -0.07em;
+}
+
+.cinema-readout small {
+  color: rgba(202, 220, 232, 0.62);
+  line-height: 1.45;
+}
+
+.marquee-strip {
+  overflow: hidden;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(90deg, rgba(114, 232, 255, 0.055), rgba(247, 195, 106, 0.045), rgba(255, 100, 100, 0.055));
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeDrive 24s linear infinite;
+}
+
+.marquee-track span {
+  padding: 0.75rem 1rem;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(233, 244, 251, 0.58);
+}
+
+.hero-copy-panel,
+.map-panel,
+.stream-panel,
+.decision-panel,
+.content-panel,
+.command-chip,
+.architecture-card {
+  transform: translateZ(0);
+}
+
+.topbar:hover,
+.command-chip:hover,
+.hero-copy-panel:hover,
+.map-panel:hover,
+.decision-panel:hover,
+.content-panel:hover {
+  border-color: rgba(247, 195, 106, 0.22);
+}
+
+@keyframes orbitSpin {
+  to { transform: rotateX(64deg) rotateZ(360deg); }
+}
+
+@keyframes coreBreathe {
+  50% { transform: scale(1.05); box-shadow: 0 0 120px rgba(255, 100, 100, 0.3); }
+}
+
+@keyframes marqueeDrive {
+  to { transform: translateX(-50%); }
+}
+
+@media (max-width: 1180px) {
+  .cinema-band {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .foresight-orb {
+    width: min(70vw, 420px);
+    grid-row: 2;
+  }
+
+  .cinema-readout {
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 840px) {
+  .cinema-band {
+    padding: 1.1rem;
+  }
+
+  .cinema-copy h2 {
+    font-size: clamp(3.1rem, 17vw, 5.4rem);
+  }
+
+  .foresight-orb {
+    width: min(78vw, 320px);
+  }
+
+  .orb-core {
+    width: 104px;
+    font-size: 1.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb-ring,
+  .orb-core,
+  .marquee-track {
+    animation: none !important;
+  }
+}
