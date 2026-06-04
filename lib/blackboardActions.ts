@@ -1,7 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { getAdminDb, getBlackboardPath } from '@/lib/firebaseAdmin';
 import { applyGeminiPayload, generateGeminiReasoning } from '@/lib/geminiReasoning';
-import { retrieveIncidentMemory, saveIncidentMemory } from '@/lib/mongoMemory';
+import { isMongoMemoryEnabled, retrieveIncidentMemory, saveIncidentMemory } from '@/lib/mongoMemory';
 import type { BlackboardEvent, BlackboardWrite, CrisisSnapshot, DebateMessage, ScenarioBranch } from '@/types';
 
 type TriggerKey = 'baseline' | 'wind-shift' | 'bridge-collapse';
@@ -199,20 +199,24 @@ export async function writeTriggerScenario(trigger: TriggerKey) {
   const ref = await activeDocumentRef();
   let snapshot = snapshotForTrigger(trigger);
 
+  let incidentMemory: unknown[] = [];
+  let mongoStatusWrite: BlackboardWrite | null = null;
+
   try {
-    const incidentMemory = await retrieveIncidentMemory(trigger, snapshot);
+    incidentMemory = await retrieveIncidentMemory(trigger, snapshot);
+    if (isMongoMemoryEnabled()) {
+      mongoStatusWrite = write(
+        'MONGODB',
+        'incident_memory.precedent_retrieval',
+        incidentMemory.length > 0
+          ? `Retrieved ${incidentMemory.length} precedent record(s) for Gemini context.`
+          : 'No matching precedent found. This run will seed incident memory.'
+      );
+    }
+
     const geminiPayload = await generateGeminiReasoning(trigger, snapshot, incidentMemory);
     if (geminiPayload) {
       snapshot = applyGeminiPayload(snapshot, geminiPayload);
-      if (incidentMemory.length > 0) {
-        snapshot = {
-          ...snapshot,
-          writes: [
-            ...snapshot.writes,
-            write('MONGODB', 'incident_memory.precedent_retrieval', `Retrieved ${incidentMemory.length} precedent record(s) for Gemini context.`)
-          ].slice(-8)
-        };
-      }
     }
   } catch (error) {
     const reason = error instanceof Error ? error.message : 'Unknown Gemini error';
@@ -227,6 +231,20 @@ export async function writeTriggerScenario(trigger: TriggerKey) {
         ...snapshot.writes,
         write('GEMINI', 'current_crisis_state/active.reasoning_error', 'Gemini generation failed; scripted branch used.')
       ].slice(-8)
+    };
+  }
+
+  if (mongoStatusWrite) {
+    snapshot = {
+      ...snapshot,
+      writes: [
+        ...snapshot.writes,
+        mongoStatusWrite
+      ].slice(-8),
+      eventStream: [
+        ...snapshot.eventStream,
+        event('MONGODB', 'memory', 'success', mongoStatusWrite.payload)
+      ].slice(-18)
     };
   }
 

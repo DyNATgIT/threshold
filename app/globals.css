@@ -1809,3 +1809,41 @@ a {
     align-items: flex-start;
   }
 }
+
+/* --- MongoDB partner memory visibility --- */
+.header-status {
+  grid-template-columns: repeat(5, minmax(96px, 1fr));
+}
+
+.memory-status strong {
+  color: #80ed99;
+}
+
+.memory-status {
+  border-color: rgba(128, 237, 153, 0.18) !important;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(128, 237, 153, 0.09), transparent 0 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.014)) !important;
+}
+
+.stream-entry:has(strong:first-child) {}
+
+.agent-mongodb,
+.stream-entry[data-agent="MONGODB"] {
+  border-left-color: rgba(128, 237, 153, 0.88) !important;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(128, 237, 153, 0.1), transparent 0 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012)) !important;
+}
+
+@media (max-width: 1380px) {
+  .header-status {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .header-status {
+    grid-template-columns: 1fr;
+  }
+}

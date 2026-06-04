@@ -35,12 +35,15 @@ export function AgentStream({ events, isReasoning = false }: { events: Blackboar
         ) : null}
 
         {ordered.map((event) => {
-          const isGemini = event.agent.toUpperCase() === 'GEMINI';
+          const agentName = event.agent.toUpperCase();
+          const isGemini = agentName === 'GEMINI';
+          const isMongo = agentName === 'MONGODB';
           return (
             <article
               key={event.id}
-              className={`stream-entry severity-${event.severity} ${isGemini ? 'agent-gemini' : ''}`}
-              data-cursor-label={isGemini ? 'GEMINI' : 'TRACE'}
+              className={`stream-entry severity-${event.severity} ${isGemini ? 'agent-gemini' : ''} ${isMongo ? 'agent-mongodb' : ''}`}
+              data-agent={agentName}
+              data-cursor-label={isGemini ? 'GEMINI' : isMongo ? 'MONGODB' : 'TRACE'}
             >
               <div className="stream-row">
                 <strong>[{event.agent}]</strong>

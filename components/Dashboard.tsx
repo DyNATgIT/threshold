@@ -188,6 +188,10 @@ export function Dashboard() {
             <span className="micro-label">Reasoning</span>
             <strong>{isReasoning ? 'Thinking' : 'Gemini Live'}</strong>
           </div>
+          <div className="memory-status">
+            <span className="micro-label">Memory</span>
+            <strong>MongoDB Atlas</strong>
+          </div>
         </div>
       </header>
 
