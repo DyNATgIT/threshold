@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=300&color=0:020407,28:07111f,52:00f5ff,76:ff344a,100:ffbf00&text=THRESHOLD&fontSize=92&fontColor=f4fbff&fontAlignY=34&desc=Gemini%20%2B%20MongoDB%20Agentic%20Crisis%20Preemption&descAlignY=58&descSize=21&descColor=dffefe&stroke=07111f&strokeWidth=1&animation=twinkling" alt="THRESHOLD — Gemini + MongoDB Agentic Crisis Preemption" />
+  <img width="100%" src="./assets/threshold-hero.svg" alt="THRESHOLD — Memory-Backed Agentic Crisis Preemption" />
 </p>
 
 <p align="center">
