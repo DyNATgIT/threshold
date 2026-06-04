@@ -19,6 +19,8 @@ export function Dashboard() {
     snapshot,
     modeLabel,
     isFirestoreLive,
+    isReasoning,
+    reasoningLabel,
     triggerMutation,
     approveDecision,
     rejectDecision,
@@ -182,8 +184,23 @@ export function Dashboard() {
             <span className="micro-label">Consensus</span>
             <strong>{snapshot.consensus}%</strong>
           </div>
+          <div className={isReasoning ? 'reasoning-status is-thinking' : 'reasoning-status'}>
+            <span className="micro-label">Reasoning</span>
+            <strong>{isReasoning ? 'Thinking' : 'Gemini Live'}</strong>
+          </div>
         </div>
       </header>
+
+      {isReasoning ? (
+        <section className="reasoning-banner" aria-live="polite">
+          <div className="reasoning-loader"><span /><span /><span /></div>
+          <div>
+            <span className="micro-label">Live reasoning</span>
+            <strong>{reasoningLabel}</strong>
+            <p>SIMULACRA is generating futures. COUNCIL is reconvening. JUDGE is preparing synthesis.</p>
+          </div>
+        </section>
+      ) : null}
 
       <section className="cinema-band motion-reveal" data-cursor-label="FORESIGHT">
         <div className="cinema-copy motion-cinema-copy">
@@ -238,7 +255,7 @@ export function Dashboard() {
       </section>
 
       <section className="hero-grid">
-        <AgentStream events={snapshot.eventStream} />
+        <AgentStream events={snapshot.eventStream} isReasoning={isReasoning} />
 
         <div className="center-column">
           <div className="hero-copy panel hero-copy-panel motion-panel-center">
@@ -287,7 +304,8 @@ export function Dashboard() {
             snapshot={snapshot}
             onMutation={triggerMutation}
             onReset={resetDemo}
-            controlsDisabled={false}
+            controlsDisabled={isReasoning}
+            isReasoning={isReasoning}
           />
         </div>
 
@@ -295,8 +313,8 @@ export function Dashboard() {
       </section>
 
       <section className="analysis-grid">
-        <SimulationPanel branches={snapshot.branches} />
-        <DebatePanel debate={snapshot.debate} />
+        <SimulationPanel branches={snapshot.branches} isReasoning={isReasoning} />
+        <DebatePanel debate={snapshot.debate} isReasoning={isReasoning} />
       </section>
 
       <section className="architecture-strip panel motion-reveal">

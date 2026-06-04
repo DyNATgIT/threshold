@@ -134,6 +134,8 @@ export function useBlackboard() {
   const [sequenceVersion, setSequenceVersion] = useState(0);
   const [firestoreEnabled, setFirestoreEnabled] = useState(false);
   const [demoActive, setDemoActive] = useState(DEFAULT_TO_DEMO || !hasFirebaseConfig());
+  const [isReasoning, setIsReasoning] = useState(false);
+  const [reasoningLabel, setReasoningLabel] = useState('Gemini Live');
 
   const canUseFirestore = useMemo(
     () => !DEFAULT_TO_DEMO && hasFirebaseConfig(),
@@ -220,6 +222,12 @@ export function useBlackboard() {
   }
 
   const triggerMutation = async (nextKey: SequenceKey) => {
+    const labelByKey: Record<SequenceKey, string> = {
+      baseline: 'Resetting baseline',
+      windShift: 'Gemini evaluating wind shift',
+      bridgeCollapse: 'Gemini recomputing route failure'
+    };
+
     if (firestoreEnabled) {
       const endpointByKey: Record<SequenceKey, string> = {
         baseline: '/api/trigger/baseline',
@@ -227,10 +235,15 @@ export function useBlackboard() {
         bridgeCollapse: '/api/trigger/bridge-collapse'
       };
 
+      setReasoningLabel(labelByKey[nextKey]);
+      setIsReasoning(true);
       try {
         await postApi(endpointByKey[nextKey]);
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsReasoning(false);
+        setReasoningLabel('Gemini Live');
       }
       return;
     }
@@ -241,10 +254,15 @@ export function useBlackboard() {
 
   const approveDecision = async () => {
     if (firestoreEnabled) {
+      setReasoningLabel('Executor locking response');
+      setIsReasoning(true);
       try {
         await postApi('/api/decision/approve');
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsReasoning(false);
+        setReasoningLabel('Gemini Live');
       }
       return;
     }
@@ -291,10 +309,15 @@ export function useBlackboard() {
 
   const rejectDecision = async () => {
     if (firestoreEnabled) {
+      setReasoningLabel('Operator override writing');
+      setIsReasoning(true);
       try {
         await postApi('/api/decision/reject');
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsReasoning(false);
+        setReasoningLabel('Gemini Live');
       }
       return;
     }
@@ -319,10 +342,15 @@ export function useBlackboard() {
 
   const resetDemo = async () => {
     if (firestoreEnabled) {
+      setReasoningLabel('Resetting baseline');
+      setIsReasoning(true);
       try {
         await postApi('/api/trigger/baseline');
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsReasoning(false);
+        setReasoningLabel('Gemini Live');
       }
       return;
     }
@@ -335,6 +363,8 @@ export function useBlackboard() {
     snapshot,
     modeLabel,
     isFirestoreLive: firestoreEnabled,
+    isReasoning,
+    reasoningLabel,
     triggerMutation,
     approveDecision,
     rejectDecision,

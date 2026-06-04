@@ -5,6 +5,7 @@ interface TacticalMapProps {
   onMutation: (key: SequenceKey) => void;
   onReset: () => void;
   controlsDisabled: boolean;
+  isReasoning?: boolean;
 }
 
 const controlOptions: Array<{ key: SequenceKey; label: string; description: string }> = [
@@ -38,7 +39,8 @@ export function TacticalMap({
   snapshot,
   onMutation,
   onReset,
-  controlsDisabled
+  controlsDisabled,
+  isReasoning = false
 }: TacticalMapProps) {
   const hotspotRadius = 110 + snapshot.hotspotLevel * 96;
   const ringRadius = 44 + snapshot.hotspotLevel * 40;
@@ -48,6 +50,12 @@ export function TacticalMap({
     <section className="panel map-panel motion-panel-center motion-reveal" data-cursor-label="MAP">
       <div className="map-ambient map-ambient-cyan" />
       <div className="map-ambient map-ambient-red" />
+      {isReasoning ? (
+        <div className="map-thinking-overlay" aria-live="polite">
+          <span className="micro-label">Gemini reasoning</span>
+          <strong>Recomputing crisis geometry</strong>
+        </div>
+      ) : null}
 
       <div className="map-overlay top-left">
         <span className="micro-label">System</span>

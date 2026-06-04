@@ -1,14 +1,16 @@
 import { ScenarioBranch } from '@/types';
 
-export function SimulationPanel({ branches }: { branches: ScenarioBranch[] }) {
+export function SimulationPanel({ branches, isReasoning = false }: { branches: ScenarioBranch[]; isReasoning?: boolean }) {
   return (
     <section className="panel content-panel futures-panel motion-reveal" data-cursor-label="FUTURES">
       <div className="panel-head">
         <span>SIMULACRA Futures</span>
-        <span className="tag">Gemini-style JSON branches</span>
+        <span className={isReasoning ? 'tag reasoning-chip' : 'tag'}>
+          {isReasoning ? 'Generating' : 'AI-generated futures'}
+        </span>
       </div>
       <p className="panel-subhead">
-        Fast probabilistic reasoning standing in for heavy physical simulation during the demo.
+        Gemini generates probabilistic futures, then the selected branch is written back to the Firestore blackboard.
       </p>
 
       <div className="branch-grid">

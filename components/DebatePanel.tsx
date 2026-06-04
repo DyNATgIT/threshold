@@ -1,13 +1,17 @@
 import { DebateMessage } from '@/types';
 
-export function DebatePanel({ debate }: { debate: DebateMessage[] }) {
+export function DebatePanel({ debate, isReasoning = false }: { debate: DebateMessage[]; isReasoning?: boolean }) {
   return (
     <section className="panel content-panel debate-panel motion-reveal" data-cursor-label="COUNCIL">
       <div className="panel-head">
         <span>Council Debate</span>
-        <span className="tag">Council of Three + Judge</span>
+        <span className={isReasoning ? 'tag reasoning-chip' : 'tag'}>
+          {isReasoning ? 'Reconvening' : 'Gemini Council + Judge'}
+        </span>
       </div>
-      <p className="panel-subhead">The money shot: three distinct value systems, one final synthesis.</p>
+      <p className="panel-subhead">
+        Three value systems debate the active crisis, then Gemini synthesizes a judge decision.
+      </p>
 
       <div className="debate-list">
         {debate.map((message) => (
