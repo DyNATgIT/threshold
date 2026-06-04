@@ -92,7 +92,7 @@ ${JSON.stringify(
   2
 )}
 
-Return strict JSON only. No markdown. No comments.
+Return compact strict JSON only. No markdown. No comments. Keep every sentence short.
 
 JSON shape:
 {
@@ -127,6 +127,8 @@ Rules:
 - Exactly one branch must be selected.
 - Return exactly 4 debate messages: PRAGMATIST, ACCOUNTANT, ETHICIST, JUDGE.
 - Use cyan for PRAGMATIST, amber for ACCOUNTANT, red for ETHICIST, gold for JUDGE.
+- Keep each debate content under 18 words.
+- Keep reasoning under 20 words.
 - Make the JUDGE synthesize the other three.
 `;
 }
@@ -194,8 +196,10 @@ function candidateModels() {
   return Array.from(
     new Set([
       process.env.GEMINI_MODEL,
-      'gemini-2.0-flash',
       'gemini-2.5-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-2.0-flash',
+      'gemini-2.0-flash-lite',
       'gemini-1.5-flash-latest',
       'gemini-1.5-flash'
     ].filter(Boolean) as string[])
@@ -210,10 +214,9 @@ async function callGemini(model: string, apiKey: string, prompt: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         generationConfig: {
-          temperature: 0.35,
+          temperature: 0.25,
           topP: 0.8,
-          maxOutputTokens: 1600,
-          responseMimeType: 'application/json'
+          maxOutputTokens: 900
         },
         contents: [
           {

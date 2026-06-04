@@ -204,7 +204,19 @@ export async function writeTriggerScenario(trigger: TriggerKey) {
       snapshot = applyGeminiPayload(snapshot, geminiPayload);
     }
   } catch (error) {
+    const reason = error instanceof Error ? error.message : 'Unknown Gemini error';
     console.error('Gemini reasoning failed. Falling back to scripted scenario.', error);
+    snapshot = {
+      ...snapshot,
+      eventStream: [
+        ...snapshot.eventStream,
+        event('GEMINI', 'reason', 'warning', `Gemini fallback used: ${reason.slice(0, 120)}`)
+      ].slice(-18),
+      writes: [
+        ...snapshot.writes,
+        write('GEMINI', 'current_crisis_state/active.reasoning_error', 'Gemini generation failed; scripted branch used.')
+      ].slice(-8)
+    };
   }
 
   await ref.set(

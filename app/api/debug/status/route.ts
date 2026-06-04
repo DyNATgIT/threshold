@@ -15,8 +15,10 @@ function candidateModels() {
   return Array.from(
     new Set([
       process.env.GEMINI_MODEL,
-      'gemini-2.0-flash',
       'gemini-2.5-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-2.0-flash',
+      'gemini-2.0-flash-lite',
       'gemini-1.5-flash-latest',
       'gemini-1.5-flash'
     ].filter(Boolean) as string[])
