@@ -287,7 +287,7 @@ export function Dashboard() {
             snapshot={snapshot}
             onMutation={triggerMutation}
             onReset={resetDemo}
-            controlsDisabled={isFirestoreLive}
+            controlsDisabled={false}
           />
         </div>
 

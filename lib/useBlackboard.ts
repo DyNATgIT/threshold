@@ -210,13 +210,45 @@ export function useBlackboard() {
     return () => window.clearInterval(interval);
   }, [demoActive, firestoreEnabled, sequenceKey, sequenceVersion]);
 
-  const triggerMutation = (nextKey: SequenceKey) => {
-    if (firestoreEnabled) return;
+  async function postApi(path: string) {
+    const response = await fetch(path, { method: 'POST' });
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`API request failed: ${path} // ${body}`);
+    }
+    return response.json();
+  }
+
+  const triggerMutation = async (nextKey: SequenceKey) => {
+    if (firestoreEnabled) {
+      const endpointByKey: Record<SequenceKey, string> = {
+        baseline: '/api/trigger/baseline',
+        windShift: '/api/trigger/wind-shift',
+        bridgeCollapse: '/api/trigger/bridge-collapse'
+      };
+
+      try {
+        await postApi(endpointByKey[nextKey]);
+      } catch (error) {
+        console.error(error);
+      }
+      return;
+    }
+
     setSequenceKey(nextKey);
     setSequenceVersion((current) => current + 1);
   };
 
-  const approveDecision = () => {
+  const approveDecision = async () => {
+    if (firestoreEnabled) {
+      try {
+        await postApi('/api/decision/approve');
+      } catch (error) {
+        console.error(error);
+      }
+      return;
+    }
+
     setSnapshot((current) => {
       const nextStatus: DecisionStatus = 'APPROVED';
       return {
@@ -257,8 +289,17 @@ export function useBlackboard() {
     }, 1500);
   };
 
-  const rejectDecision = () => {
-    setSnapshot((current) => ({
+  const rejectDecision = async () => {
+    if (firestoreEnabled) {
+      try {
+        await postApi('/api/decision/reject');
+      } catch (error) {
+        console.error(error);
+      }
+      return;
+    }
+
+    setSnapshot((current) => ({ 
       ...current,
       triggerState: 'REVIEW OVERRIDE',
       decision: {
@@ -276,6 +317,20 @@ export function useBlackboard() {
     }));
   };
 
+  const resetDemo = async () => {
+    if (firestoreEnabled) {
+      try {
+        await postApi('/api/trigger/baseline');
+      } catch (error) {
+        console.error(error);
+      }
+      return;
+    }
+
+    setSequenceKey('baseline');
+    setSequenceVersion((current) => current + 1);
+  };
+
   return {
     snapshot,
     modeLabel,
@@ -283,9 +338,6 @@ export function useBlackboard() {
     triggerMutation,
     approveDecision,
     rejectDecision,
-    resetDemo: () => {
-      setSequenceKey('baseline');
-      setSequenceVersion((current) => current + 1);
-    }
+    resetDemo
   };
 }
