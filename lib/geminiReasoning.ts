@@ -92,7 +92,8 @@ ${JSON.stringify(
   2
 )}
 
-Return compact strict JSON only. No markdown. No comments. Keep every sentence short.
+You must respond with a single valid JSON object. The first character must be { and the last character must be }.
+No markdown. No prose. No comments. Keep every sentence short.
 
 JSON shape:
 {
@@ -206,7 +207,7 @@ function candidateModels() {
   );
 }
 
-async function callGemini(model: string, apiKey: string, prompt: string) {
+async function callGemini(model: string, apiKey: string, prompt: string, jsonMode: boolean) {
   return fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
@@ -214,9 +215,10 @@ async function callGemini(model: string, apiKey: string, prompt: string) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         generationConfig: {
-          temperature: 0.25,
+          temperature: 0.2,
           topP: 0.8,
-          maxOutputTokens: 900
+          maxOutputTokens: 2200,
+          ...(jsonMode ? { responseMimeType: 'application/json' } : {})
         },
         contents: [
           {
@@ -238,24 +240,32 @@ export async function generateGeminiReasoning(trigger: TriggerKey, snapshot: Cri
   const errors: string[] = [];
 
   for (const model of candidateModels()) {
-    const response = await callGemini(model, apiKey, prompt);
+    for (const jsonMode of [true, false]) {
+      const response = await callGemini(model, apiKey, prompt, jsonMode);
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      errors.push(`${model}: ${response.status} ${errorBody.slice(0, 240)}`);
-      continue;
+      if (!response.ok) {
+        const errorBody = await response.text();
+        errors.push(`${model}${jsonMode ? '/json' : '/text'}: ${response.status} ${errorBody.slice(0, 240)}`);
+        continue;
+      }
+
+      const data = await response.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (typeof text !== 'string') {
+        errors.push(`${model}${jsonMode ? '/json' : '/text'}: response did not include text`);
+        continue;
+      }
+
+      try {
+        const parsed = JSON.parse(extractJson(text)) as Partial<GeminiPayload>;
+        return normalizePayload(parsed, snapshot);
+      } catch (error) {
+        errors.push(
+          `${model}${jsonMode ? '/json' : '/text'}: ${error instanceof Error ? error.message : 'parse failed'} // raw=${text.slice(0, 220)}`
+        );
+      }
     }
-
-    const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (typeof text !== 'string') {
-      errors.push(`${model}: response did not include text`);
-      continue;
-    }
-
-    const parsed = JSON.parse(extractJson(text)) as Partial<GeminiPayload>;
-    return normalizePayload(parsed, snapshot);
   }
 
   throw new Error(`Gemini request failed for all candidate models: ${errors.join(' | ')}`);
