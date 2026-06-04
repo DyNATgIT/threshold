@@ -1,7 +1,11 @@
-# THRESHOLD
+<p align="center">
+  <img width="100%" src="https://capsule-render.vercel.app/api?type=waving&height=280&color=0:030407,35:005f73,70:00e5ff,100:f7c36a&text=THRESHOLD&fontSize=88&fontColor=ffffff&fontAlignY=35&desc=Memory-Backed%20Agentic%20Crisis%20Preemption&descAlignY=58&descSize=22&descColor=ffffff&animation=twinkling" alt="THRESHOLD — Memory-Backed Agentic Crisis Preemption" />
+</p>
 
-> **Autonomous crisis preemption command.**  
-> A Gemini-powered multi-agent system that watches a live crisis state, simulates futures, debates response paths, and writes operational decisions to a shared Firestore blackboard before impact.
+<p align="center">
+  <strong>Autonomous crisis preemption command.</strong><br />
+  A Gemini-powered multi-agent system that watches a live crisis state, simulates futures, debates response paths, and writes operational decisions to a shared Firestore blackboard before impact.
+</p>
 
 [![Built with Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org/)
 [![Powered by Gemini](https://img.shields.io/badge/Gemini-Reasoning-4285F4?style=for-the-badge&logo=google)](https://ai.google.dev/)
