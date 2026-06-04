@@ -215,6 +215,7 @@ Records operator approval/rejection and moves the decision into execution state.
 | `/api/decision/approve` | POST | Approve current response |
 | `/api/decision/reject` | POST | Reject current response |
 | `/api/debug/status` | GET | Safe diagnostic check for Firebase/Gemini env |
+| `/api/debug/mongo` | GET/POST | Verify MongoDB connection and test memory insert |
 
 ---
 
@@ -241,6 +242,9 @@ NEXT_PUBLIC_FIRESTORE_BLACKBOARD_DOC=active
 FIREBASE_SERVICE_ACCOUNT_JSON=
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-2.5-flash
+MONGODB_URI=
+MONGODB_DB=threshold
+MONGODB_MEMORY_COLLECTION=incident_memory
 ```
 
 ### 3. Run
@@ -330,19 +334,25 @@ The demo moment is simple:
 
 ---
 
-## Roadmap
+## Current Status
 
-- [x] Tactical command-center frontend
-- [x] Firestore blackboard listener
-- [x] Vercel API write routes
-- [x] Firebase Admin backend writes
-- [x] Gemini-generated simulation/debate/decision
-- [x] Human-in-the-loop approve/reject
-- [x] MongoDB incident memory scaffold
-- [ ] MongoDB MCP server wiring for final partner-track validation
-- [x] Incident memory retrieval / persistence hooks
-- [ ] Operator authentication
-- [ ] Real alerting integrations
+### Completed
+
+- Tactical command-center frontend
+- Firestore blackboard listener
+- Vercel API write routes
+- Firebase Admin backend writes
+- Gemini-generated simulation, debate, and decision output
+- Human-in-the-loop approve/reject flow
+- MongoDB Atlas incident memory scaffold
+- Incident memory retrieval and persistence hooks
+- Debug endpoints for Firebase, Gemini, and MongoDB health checks
+
+### Next Production Extensions
+
+- MongoDB MCP server wiring for final partner-track validation
+- Operator authentication
+- Real alerting and dispatch integrations
 
 ---
 
