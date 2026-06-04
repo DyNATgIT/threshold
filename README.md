@@ -9,6 +9,7 @@
 
 [![Built with Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org/)
 [![Powered by Gemini](https://img.shields.io/badge/Gemini-Reasoning-4285F4?style=for-the-badge&logo=google)](https://ai.google.dev/)
+[![MongoDB Atlas](https://img.shields.io/badge/MongoDB%20Atlas-Incident%20Memory-00ED64?style=for-the-badge&logo=mongodb&logoColor=001E2B)](https://www.mongodb.com/atlas)
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel)](https://vercel.com/)
 
@@ -17,6 +18,24 @@
 **Project URL:** https://threshold-psi-tawny.vercel.app
 
 > Demo tip: click **Wind Shift** or **Bridge Collapse** and watch the blackboard update live.
+
+## MongoDB Partner Integration
+
+THRESHOLD uses **MongoDB Atlas as persistent incident memory**.
+
+Every Gemini-generated crisis run is stored in MongoDB as precedent. On future crisis triggers, THRESHOLD retrieves relevant prior incidents from MongoDB and injects them into Gemini context before generating new futures, debate, and judge decisions.
+
+```txt
+MongoDB Atlas = long-term incident memory
+Firestore    = live operational blackboard
+Gemini       = simulation + council + judge reasoning
+```
+
+Quick verification endpoint:
+
+```txt
+/api/debug/mongo
+```
 
 ---
 
