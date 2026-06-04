@@ -11,36 +11,61 @@ function serviceAccountProjectId() {
   }
 }
 
+function candidateModels() {
+  return Array.from(
+    new Set([
+      process.env.GEMINI_MODEL,
+      'gemini-2.0-flash',
+      'gemini-2.5-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-flash'
+    ].filter(Boolean) as string[])
+  );
+}
+
+async function probeModel(model: string) {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        generationConfig: { maxOutputTokens: 8 },
+        contents: [{ role: 'user', parts: [{ text: 'Return OK.' }] }]
+      })
+    }
+  );
+
+  if (response.ok) return { model, ok: true as const };
+  return { model, ok: false as const, error: `${response.status} ${await response.text()}`.slice(0, 500) };
+}
+
 export async function GET() {
   const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY);
-  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+  const models = candidateModels();
   let geminiProbe: 'skipped' | 'ok' | 'failed' = 'skipped';
-  let geminiError: string | null = null;
+  let geminiWorkingModel: string | null = null;
+  const geminiErrors: Array<{ model: string; error: string }> = [];
 
   if (hasGeminiKey) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${process.env.GEMINI_API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            generationConfig: { maxOutputTokens: 8 },
-            contents: [{ role: 'user', parts: [{ text: 'Return OK.' }] }]
-          })
+    for (const model of models) {
+      try {
+        const result = await probeModel(model);
+        if (result.ok) {
+          geminiProbe = 'ok';
+          geminiWorkingModel = model;
+          break;
         }
-      );
-
-      if (response.ok) {
-        geminiProbe = 'ok';
-      } else {
-        geminiProbe = 'failed';
-        geminiError = `${response.status} ${await response.text()}`.slice(0, 500);
+        geminiErrors.push({ model, error: result.error });
+      } catch (error) {
+        geminiErrors.push({
+          model,
+          error: error instanceof Error ? error.message : 'Unknown Gemini probe error'
+        });
       }
-    } catch (error) {
-      geminiProbe = 'failed';
-      geminiError = error instanceof Error ? error.message : 'Unknown Gemini probe error';
     }
+
+    if (!geminiWorkingModel) geminiProbe = 'failed';
   }
 
   return NextResponse.json({
@@ -51,9 +76,11 @@ export async function GET() {
       FIREBASE_SERVICE_ACCOUNT_JSON: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON),
       FIREBASE_SERVICE_ACCOUNT_PROJECT_ID: serviceAccountProjectId(),
       GEMINI_API_KEY: hasGeminiKey,
-      GEMINI_MODEL: model
+      GEMINI_MODEL: process.env.GEMINI_MODEL || null,
+      GEMINI_CANDIDATE_MODELS: models
     },
     geminiProbe,
-    geminiError
+    geminiWorkingModel,
+    geminiErrors
   });
 }

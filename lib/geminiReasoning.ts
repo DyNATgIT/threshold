@@ -190,13 +190,20 @@ function normalizePayload(payload: Partial<GeminiPayload>, fallback: CrisisSnaps
   };
 }
 
-export async function generateGeminiReasoning(trigger: TriggerKey, snapshot: CrisisSnapshot): Promise<GeminiPayload | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+function candidateModels() {
+  return Array.from(
+    new Set([
+      process.env.GEMINI_MODEL,
+      'gemini-2.0-flash',
+      'gemini-2.5-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-flash'
+    ].filter(Boolean) as string[])
+  );
+}
 
-  if (!apiKey) return null;
-
-  const response = await fetch(
+async function callGemini(model: string, apiKey: string, prompt: string) {
+  return fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
@@ -211,27 +218,44 @@ export async function generateGeminiReasoning(trigger: TriggerKey, snapshot: Cri
         contents: [
           {
             role: 'user',
-            parts: [{ text: buildPrompt(trigger, snapshot) }]
+            parts: [{ text: prompt }]
           }
         ]
       })
     }
   );
+}
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`Gemini request failed: ${response.status} ${errorBody}`);
+export async function generateGeminiReasoning(trigger: TriggerKey, snapshot: CrisisSnapshot): Promise<GeminiPayload | null> {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) return null;
+
+  const prompt = buildPrompt(trigger, snapshot);
+  const errors: string[] = [];
+
+  for (const model of candidateModels()) {
+    const response = await callGemini(model, apiKey, prompt);
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      errors.push(`${model}: ${response.status} ${errorBody.slice(0, 240)}`);
+      continue;
+    }
+
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (typeof text !== 'string') {
+      errors.push(`${model}: response did not include text`);
+      continue;
+    }
+
+    const parsed = JSON.parse(extractJson(text)) as Partial<GeminiPayload>;
+    return normalizePayload(parsed, snapshot);
   }
 
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (typeof text !== 'string') {
-    throw new Error('Gemini response did not include text.');
-  }
-
-  const parsed = JSON.parse(extractJson(text)) as Partial<GeminiPayload>;
-  return normalizePayload(parsed, snapshot);
+  throw new Error(`Gemini request failed for all candidate models: ${errors.join(' | ')}`);
 }
 
 export function applyGeminiPayload(snapshot: CrisisSnapshot, payload: GeminiPayload): CrisisSnapshot {
