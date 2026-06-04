@@ -71,12 +71,19 @@ function normalizeTone(value: unknown, fallback: GeminiDebate['tone']): GeminiDe
   return fallback;
 }
 
-function buildPrompt(trigger: TriggerKey, snapshot: CrisisSnapshot) {
+function buildPrompt(trigger: TriggerKey, snapshot: CrisisSnapshot, incidentMemory: unknown[] = []) {
+  const memoryText = incidentMemory.length
+    ? JSON.stringify(incidentMemory, null, 2)
+    : 'No MongoDB incident memory retrieved for this trigger.';
+
   return `
 You are SIMULACRA + COUNCIL + JUDGE inside THRESHOLD, an autonomous crisis command system.
 
 Tone: cold, precise, authoritative. No marketing language.
 Scenario trigger: ${trigger}
+MongoDB incident memory / precedent context:
+${memoryText}
+
 Current snapshot:
 ${JSON.stringify(
   {
@@ -231,12 +238,16 @@ async function callGemini(model: string, apiKey: string, prompt: string, jsonMod
   );
 }
 
-export async function generateGeminiReasoning(trigger: TriggerKey, snapshot: CrisisSnapshot): Promise<GeminiPayload | null> {
+export async function generateGeminiReasoning(
+  trigger: TriggerKey,
+  snapshot: CrisisSnapshot,
+  incidentMemory: unknown[] = []
+): Promise<GeminiPayload | null> {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) return null;
 
-  const prompt = buildPrompt(trigger, snapshot);
+  const prompt = buildPrompt(trigger, snapshot, incidentMemory);
   const errors: string[] = [];
 
   for (const model of candidateModels()) {

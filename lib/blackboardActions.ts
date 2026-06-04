@@ -1,6 +1,7 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { getAdminDb, getBlackboardPath } from '@/lib/firebaseAdmin';
 import { applyGeminiPayload, generateGeminiReasoning } from '@/lib/geminiReasoning';
+import { retrieveIncidentMemory, saveIncidentMemory } from '@/lib/mongoMemory';
 import type { BlackboardEvent, BlackboardWrite, CrisisSnapshot, DebateMessage, ScenarioBranch } from '@/types';
 
 type TriggerKey = 'baseline' | 'wind-shift' | 'bridge-collapse';
@@ -199,9 +200,19 @@ export async function writeTriggerScenario(trigger: TriggerKey) {
   let snapshot = snapshotForTrigger(trigger);
 
   try {
-    const geminiPayload = await generateGeminiReasoning(trigger, snapshot);
+    const incidentMemory = await retrieveIncidentMemory(trigger, snapshot);
+    const geminiPayload = await generateGeminiReasoning(trigger, snapshot, incidentMemory);
     if (geminiPayload) {
       snapshot = applyGeminiPayload(snapshot, geminiPayload);
+      if (incidentMemory.length > 0) {
+        snapshot = {
+          ...snapshot,
+          writes: [
+            ...snapshot.writes,
+            write('MONGODB', 'incident_memory.precedent_retrieval', `Retrieved ${incidentMemory.length} precedent record(s) for Gemini context.`)
+          ].slice(-8)
+        };
+      }
     }
   } catch (error) {
     const reason = error instanceof Error ? error.message : 'Unknown Gemini error';
@@ -226,6 +237,12 @@ export async function writeTriggerScenario(trigger: TriggerKey) {
     },
     { merge: true }
   );
+
+  try {
+    await saveIncidentMemory(trigger, snapshot);
+  } catch (error) {
+    console.error('MongoDB memory write failed. Continuing without memory persistence.', error);
+  }
 
   return snapshot;
 }

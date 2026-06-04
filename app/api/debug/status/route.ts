@@ -79,7 +79,10 @@ export async function GET() {
       FIREBASE_SERVICE_ACCOUNT_PROJECT_ID: serviceAccountProjectId(),
       GEMINI_API_KEY: hasGeminiKey,
       GEMINI_MODEL: process.env.GEMINI_MODEL || null,
-      GEMINI_CANDIDATE_MODELS: models
+      GEMINI_CANDIDATE_MODELS: models,
+      MONGODB_URI: Boolean(process.env.MONGODB_URI),
+      MONGODB_DB: process.env.MONGODB_DB || 'threshold',
+      MONGODB_MEMORY_COLLECTION: process.env.MONGODB_MEMORY_COLLECTION || 'incident_memory'
     },
     geminiProbe,
     geminiWorkingModel,
