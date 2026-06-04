@@ -1,5 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { getAdminDb, getBlackboardPath } from '@/lib/firebaseAdmin';
+import { applyGeminiPayload, generateGeminiReasoning } from '@/lib/geminiReasoning';
 import type { BlackboardEvent, BlackboardWrite, CrisisSnapshot, DebateMessage, ScenarioBranch } from '@/types';
 
 type TriggerKey = 'baseline' | 'wind-shift' | 'bridge-collapse';
@@ -195,7 +196,16 @@ async function activeDocumentRef() {
 
 export async function writeTriggerScenario(trigger: TriggerKey) {
   const ref = await activeDocumentRef();
-  const snapshot = snapshotForTrigger(trigger);
+  let snapshot = snapshotForTrigger(trigger);
+
+  try {
+    const geminiPayload = await generateGeminiReasoning(trigger, snapshot);
+    if (geminiPayload) {
+      snapshot = applyGeminiPayload(snapshot, geminiPayload);
+    }
+  } catch (error) {
+    console.error('Gemini reasoning failed. Falling back to scripted scenario.', error);
+  }
 
   await ref.set(
     {
