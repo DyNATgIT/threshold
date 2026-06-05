@@ -13,6 +13,12 @@
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=for-the-badge&logo=firebase)](https://firebase.google.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel)](https://vercel.com/)
 
+## Creator
+
+Built by **Aayu Wadhwani** for the **Google Cloud Rapid Agent Hackathon**.
+
+THRESHOLD uses Gemini as the reasoning engine, Firebase Firestore as the live blackboard, and MongoDB Atlas as incident memory.
+
 ## Live Demo
 
 **Project URL:** https://threshold-psi-tawny.vercel.app
