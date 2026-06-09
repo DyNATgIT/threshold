@@ -335,11 +335,11 @@ The hackathon asks builders to move beyond chat and create agents that reason, p
 
 ### Partner Track Note
 
-THRESHOLD is being extended through the **MongoDB partner track** as an incident memory layer. MongoDB stores prior crisis states, selected response branches, debate summaries, and judge decisions. When a new crisis mutation is triggered, THRESHOLD retrieves relevant precedent records and injects them into Gemini context before SIMULACRA generates futures.
+THRESHOLD uses the **MongoDB partner track** as its incident memory layer. MongoDB Atlas stores prior crisis states, selected response branches, debate summaries, and judge decisions. When a new crisis mutation is triggered, THRESHOLD retrieves relevant precedent records and injects them into Gemini context before SIMULACRA generates futures.
 
 This turns the system from one-off reasoning into memory-backed crisis preemption.
 
-Planned MCP framing for submission: MongoDB MCP gives the agent access to operational precedent memory and incident retrieval tools.
+MongoDB MCP Server was also configured locally with VS Code MongoDB Agent Skills for MCP-compatible access to the same `threshold.incident_memory` collection. See [`docs/MONGODB_MCP.md`](./docs/MONGODB_MCP.md) and [`mcp/mongodb-mcp.example.json`](./mcp/mongodb-mcp.example.json).
 
 ---
 

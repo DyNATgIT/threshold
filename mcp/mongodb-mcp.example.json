@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": ["-y", "mongodb-mcp-server@latest"],
+      "env": {
+        "MDB_MCP_CONNECTION_STRING": "mongodb+srv://<username>:<password>@<cluster-host>/?retryWrites=true&w=majority&appName=<app-name>",
+        "MDB_MCP_READ_ONLY": "true"
+      }
+    }
+  }
+}
